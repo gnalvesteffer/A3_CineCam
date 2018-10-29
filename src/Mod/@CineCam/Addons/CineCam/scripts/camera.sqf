@@ -13,13 +13,13 @@ ThirdPerson_AutomaticWeaponFireModes = ["fullauto", "manual"];
 ThirdPerson_CameraPositionOffset = [0.025, -1, 0.2];
 ThirdPerson_FreeLookCameraPositionOffset = [0.1, 0.45, 0.02];
 ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
-ThirdPerson_WeaponRaisedCameraPositionOffset = [0.15, 0.15, -0.15];
+ThirdPerson_WeaponRaisedCameraPositionOffset = [0.35, 0.15, -0.15];
 ThirdPerson_WeaponRaisedCameraPitchOffset = 10;
 ThirdPerson_WeaponRaisedCameraBankOffset = -1.5;
 ThirdPerson_CameraPitchOffset = -5;
 ThirdPerson_CameraBankOffset = -3.5;
 ThirdPerson_CameraPositionLeanRightOffset = 0.75;
-ThirdPerson_CameraPositionLeanLeftOffset = 8;
+ThirdPerson_CameraPositionLeanLeftOffset = 10;
 ThirdPerson_CameraMovementSpeed = [0.35, 0.35, 0.35];
 ThirdPerson_CameraRotationSpeed = 0.15;
 
@@ -81,15 +81,17 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
   _actionKey = _this select 1;
   _shouldInterceptKey = false;
 
-  if (_actionKey in actionKeys "reloadMagazine") then {
-    reload ThirdPerson_FocusedUnit;
-	};
+  if (cameraOn == ThirdPerson_Camera) then {
+    if (_actionKey in actionKeys "reloadMagazine") then {
+      reload ThirdPerson_FocusedUnit;
+    };
+  };
 
   if (_actionKey in actionKeys "personView") then {
     ThirdPerson_IsInFirstPerson = !ThirdPerson_IsInFirstPerson;
     ThirdPerson_IsAimingDownSightsFromThirdPerson = false;
     _shouldInterceptKey = true;
-	};
+  };
 
 	_shouldInterceptKey;
 }];
@@ -181,14 +183,18 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     ThirdPerson_CameraShakeAmount = ThirdPerson_CameraShakeAmount * 0.85;
 
     // Handle point of view.
-    if (ThirdPerson_IsInFirstPerson) then {
-      if (ThirdPerson_IsAimingDownSightsFromThirdPerson) then {
-        ThirdPerson_FocusedUnit switchCamera "gunner";
-      } else {
-        ThirdPerson_FocusedUnit switchCamera "internal";
-      }
+    if (vehicle ThirdPerson_FocusedUnit != ThirdPerson_FocusedUnit) then {
+      switchCamera ThirdPerson_FocusedUnit;
     } else {
-      switchCamera ThirdPerson_Camera;
+      if (ThirdPerson_IsInFirstPerson) then {
+        if (ThirdPerson_IsAimingDownSightsFromThirdPerson) then {
+          ThirdPerson_FocusedUnit switchCamera "gunner";
+        } else {
+          ThirdPerson_FocusedUnit switchCamera "internal";
+        }
+      } else {
+        switchCamera ThirdPerson_Camera;
+      };
     };
 
     // Handle night vision.
