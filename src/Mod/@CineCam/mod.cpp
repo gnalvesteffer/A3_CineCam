@@ -1,0 +1,13 @@
+name = "CineCam";
+picture = "mod.paa";
+actionName = "Steam Workshop Page";
+action = "https://forums.bohemia.net/forums/topic/220040-wip-cinecam-cinematic-third-person-camera-replacement/";
+description = "Replaces the third-person camera with a more cinematic one.";
+logo = "mod.paa";
+logoOver = "mod.paa";
+tooltip = "CineCam";
+tooltipOwned = "";
+overview = "Cinematic Third-Person Camera Replacement";
+author = "Zooloo75";
+overviewPicture = "mod.paa";
+overviewText = "";
