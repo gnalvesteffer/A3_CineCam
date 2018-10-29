@@ -1,35 +1,26 @@
-//-- *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+//-- *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 //-- Title: CineCam | Cinematic Third-Person Camera Replacement
 //-- Author: Zooloo75
 //-- BIForums Topic: https://forums.bohemia.net/forums/topic/220040-cinecam-an-immersive-third-person-camera-replacement/
-//-- Known Issues / ToDo:
-//-- * [Issue] Reloading a secondary weapon while in third-person will reload the primary weapon first if it needs to be reloaded (limitation of `reload` command).
-//-- * [Issue] Certain actions can't be performed in third-person due to technical limitations of being switched to a separate camera.
-//-- * [ToDo] Camera yaw does not utilize torque yet (need to figure out how to handle rotation from 359deg to 0deg, as it rotates 359deg backwards instead of 1deg forward).
-//-- * [ToDo] Respect different vision modes, such as night vision, and thermal vision.
-//-- * [ToDo] Separate camera position offset handling for both left and right leaning (common problem of limited visibility when leaning left with right-oriented shoulder cam).
-//-- * [ToDo] Improve recoil feedback (perhaps tie it to arm/shoulder movement since that should accurately represent the recoil motion?).
-//-- * [ToDo] Make camera settings user-configurable.
-//-- * [ToDo] Handle third-person vehicle camera.
-//-- * [ToDo] Obligatory code refactor.
-//-- *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+//-- *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 
 // Constants.
 ThirdPerson_DegreesToRadians = pi / 180;
 ThirdPerson_RadiansToDegrees = 180 / pi;
+ThirdPerson_AutomaticWeaponFireModes = ["fullauto", "manual"];
 
 // Camera settings.
 ThirdPerson_CameraPositionOffset = [0.025, -1, 0.2];
 ThirdPerson_FreeLookCameraPositionOffset = [0.1, 0.45, 0.02];
 ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
-ThirdPerson_WeaponRaisedCameraPositionOffset = [0.15, 0.15, -0.05];
-ThirdPerson_WeaponRaisedCameraPitchOffset = 5;
+ThirdPerson_WeaponRaisedCameraPositionOffset = [0.15, 0.15, -0.15];
+ThirdPerson_WeaponRaisedCameraPitchOffset = 10;
 ThirdPerson_WeaponRaisedCameraBankOffset = -1.5;
 ThirdPerson_CameraPitchOffset = -5;
 ThirdPerson_CameraBankOffset = -3.5;
 ThirdPerson_CameraPositionLeanOffset = 0.75;
-ThirdPerson_CameraMovementSpeed = 0.2;
-ThirdPerson_CameraRotationSpeed = 0.1;
+ThirdPerson_CameraMovementSpeed = [0.35, 0.5, 0.1];
+ThirdPerson_CameraRotationSpeed = 0.15;
 
 // Global state.
 ThirdPerson_FocusedUnit = player;
@@ -107,6 +98,9 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
   "ThirdPerson",
   "onEachFrame",
   {
+    // Ensure that camera is focused on player.
+    ThirdPerson_FocusedUnit = player;
+
     // Limit camera shake amount.
     ThirdPerson_CameraShakeAmount = ThirdPerson_CameraShakeAmount min 1;
 
@@ -149,7 +143,11 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     // Handle camera position.
     _cameraTargetPosition = AGLToASL (ThirdPerson_FocusedUnit modelToWorldVisual _focusedUnitModelPositionWithOffset);
     _positionDifference = _cameraTargetPosition vectorDiff ThirdPerson_CameraPosition;
-    ThirdPerson_CameraVelocity = _positionDifference vectorMultiply ThirdPerson_CameraMovementSpeed;
+    ThirdPerson_CameraVelocity = [
+      (_positionDifference select 0) * (ThirdPerson_CameraMovementSpeed select 0),
+      (_positionDifference select 1) * (ThirdPerson_CameraMovementSpeed select 1),
+      (_positionDifference select 2) * (ThirdPerson_CameraMovementSpeed select 2)
+    ];
     ThirdPerson_CameraPosition = ThirdPerson_CameraPosition vectorAdd ThirdPerson_CameraVelocity;
     ThirdPerson_Camera setPosASL ThirdPerson_CameraPosition;
 
@@ -189,12 +187,9 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     // Handle weapon firing.
     if (ThirdPerson_IsFiring) then {
       ThirdPerson_FocusedUnit forceWeaponFire [weaponState ThirdPerson_FocusedUnit select 1, weaponState ThirdPerson_FocusedUnit select 2];
-      // Handle firemode.
       _weaponState = weaponState ThirdPerson_FocusedUnit;
       _fireMode = _weaponState select 2;
-      if (_fireMode != "fullauto") then {
-        ThirdPerson_IsFiring = false;
-      };
+      ThirdPerson_IsFiring = _fireMode in ThirdPerson_AutomaticWeaponFireModes;
     };
   }
 ] call BIS_fnc_addStackedEventHandler;
