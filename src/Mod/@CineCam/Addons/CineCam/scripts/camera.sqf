@@ -18,8 +18,9 @@ ThirdPerson_WeaponRaisedCameraPitchOffset = 10;
 ThirdPerson_WeaponRaisedCameraBankOffset = -1.5;
 ThirdPerson_CameraPitchOffset = -5;
 ThirdPerson_CameraBankOffset = -3.5;
-ThirdPerson_CameraPositionLeanOffset = 0.75;
-ThirdPerson_CameraMovementSpeed = [0.35, 0.5, 0.1];
+ThirdPerson_CameraPositionLeanRightOffset = 0.75;
+ThirdPerson_CameraPositionLeanLeftOffset = 8;
+ThirdPerson_CameraMovementSpeed = [0.35, 0.35, 0.35];
 ThirdPerson_CameraRotationSpeed = 0.15;
 
 // Global state.
@@ -120,12 +121,21 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     _weaponRaisedCameraPositionOffset = [0, 0, 0];
     _weaponRaisedCameraPitchOffset = 0;
     _weaponRaisedCameraBankOffset = 0;
+    _cameraPositionLeanOffset = [0, 0, 0];
     if (!weaponLowered ThirdPerson_FocusedUnit) then {
       _weaponRaisedCameraPositionOffset = ThirdPerson_WeaponRaisedCameraPositionOffset;
       _weaponRaisedCameraPitchOffset = ThirdPerson_WeaponRaisedCameraPitchOffset;
       _weaponRaisedCameraBankOffset = ThirdPerson_WeaponRaisedCameraBankOffset;
+      if (inputAction "LeanLeft" > 0 || inputAction "LeanLeftToggle" > 0 || inputAction "LeanRightToggle" > 0 || inputAction "LeanRightToggle" > 0) then {
+        if (_focusedUnitLeanAmount > 0) then {
+          _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset * _focusedUnitLeanAmount, 0, 0];
+        } else {
+          if (_focusedUnitLeanAmount < 0) then {
+            _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanLeftOffset * _focusedUnitLeanAmount, 0, 0];
+          };
+        };
+      };
     };
-    _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanOffset * _focusedUnitLeanAmount, 0, 0];
     _cameraPositionSwayOffset = [sin (time * 45) * 0.015, cos (time * 60) * 0.0085, sin (time * 50) * 0.001];
     _cameraPositionShakeOffset = [0, (ThirdPerson_CameraShakeAmount * -0.3), -0.2 * ThirdPerson_CameraShakeAmount];
     _cameraPositionLookOffset = [0, ((_focusedUnitEyeDirection select 2) * -0.5), ((_focusedUnitEyeDirection select 2) * -0.75)];
