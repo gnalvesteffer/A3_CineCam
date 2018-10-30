@@ -190,7 +190,7 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
         if (ThirdPerson_IsAimingDownSightsFromThirdPerson) then {
           ThirdPerson_FocusedUnit switchCamera "gunner";
         } else {
-          ThirdPerson_FocusedUnit switchCamera "internal";
+          switchCamera ThirdPerson_FocusedUnit;
         }
       } else {
         switchCamera ThirdPerson_Camera;
