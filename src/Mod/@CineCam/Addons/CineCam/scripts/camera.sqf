@@ -7,7 +7,7 @@
 // Constants.
 ThirdPerson_DegreesToRadians = pi / 180;
 ThirdPerson_RadiansToDegrees = 180 / pi;
-ThirdPerson_AutomaticWeaponFireModes = ["fullauto", "manual"];
+ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "Manual"];
 
 // Camera settings.
 ThirdPerson_CameraPositionOffset = [0.025, -1, 0.2];

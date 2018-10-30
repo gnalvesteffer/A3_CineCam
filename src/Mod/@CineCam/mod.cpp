@@ -1,6 +1,6 @@
 name = "CineCam";
 picture = "mod.paa";
-actionName = "Steam Workshop Page";
+actionName = "BIForums";
 action = "https://forums.bohemia.net/forums/topic/220040-wip-cinecam-cinematic-third-person-camera-replacement/";
 description = "Replaces the third-person camera with a more cinematic one.";
 logo = "mod.paa";
