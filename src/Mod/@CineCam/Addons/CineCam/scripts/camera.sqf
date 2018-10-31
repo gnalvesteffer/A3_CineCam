@@ -11,7 +11,7 @@ ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "Manual"];
 
 // Camera settings.
 ThirdPerson_CameraPositionOffset = [0.025, -0.85, 0.15];
-ThirdPerson_FreeLookCameraPositionOffset = [0.025, 0.25, -0.03];
+ThirdPerson_FreeLookCameraPositionOffset = [0.125, 0.25, -0.03];
 ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
 ThirdPerson_WeaponRaisedCameraPositionOffset = [0.35, 0.15, -0.15];
 ThirdPerson_WeaponRaisedCameraPitchOffset = 10;
@@ -23,7 +23,7 @@ ThirdPerson_CameraPositionLeanLeftOffset = 0;
 ThirdPerson_CameraMovementSpeed = [0.35, 0.35, 0.35];
 ThirdPerson_CameraRotationSpeed = 0.15;
 ThirdPerson_ArePostProcessingEffectsEnabled = true;
-ThirdPerson_ShouldSwitchShoulderOnLean = false;
+ThirdPerson_ShouldAutoFlipShoulderCameraPositionOnLean = true;
 
 // Global state.
 ThirdPerson_FocusedUnit = player;
@@ -51,6 +51,12 @@ ThirdPerson_CameraShoulder = 1; // -1 = left shoulder, 1 = right shoulder.
 ] call CBA_fnc_addKeybind;
 
 // Useful functions.
+ThirdPerson_IsToggleCameraShoulderKeybindingDefined = {
+  _keybinding = ["CineCam", "ToggleCameraShoulder"] call CBA_fnc_getKeybind;
+  _keybinds = _keybinding select 8;
+  count _keybinds > 0;
+};
+
 ThirdPerson_IsWeaponLowered = {
   _unit = param [0];
   _unitAnimationState = animationState _unit;
@@ -176,14 +182,13 @@ ThirdPerson_IsUnitInRightCombatStance = {
     _weaponRaisedCameraBankOffset = 0;
     _cameraPositionLeanOffset = [0, 0, 0];
     if (!(ThirdPerson_FocusedUnit call ThirdPerson_IsWeaponLowered)) then {
-      _isToggleCameraShoulderKeybindingUndefined = isNil { ["CineCam", "ToggleCameraShoulder"] call CBA_fnc_getKeybind };
-      if (_isToggleCameraShoulderKeybindingUndefined) then {
+      if (!(call ThirdPerson_IsToggleCameraShoulderKeybindingDefined)) then {
         if (_focusedUnitLeanAmount < 0 &&
             inputAction "LeanLeft" > 0 ||
             inputAction "LeanLeftToggle" > 0 ||
             ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInLeftCombatStance) then {
               _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanLeftOffset, 0, 0];
-              if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
+              if (ThirdPerson_ShouldAutoFlipShoulderCameraPositionOnLean) then {
                 ThirdPerson_CameraShoulder = -1;
               };
         } else {
@@ -191,10 +196,10 @@ ThirdPerson_IsUnitInRightCombatStance = {
               inputAction "LeanRight" > 0 ||
               inputAction "LeanRightToggle" > 0 ||
               ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInRightCombatStance) then {
-                _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset, 0, 0];
-                if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
-                  ThirdPerson_CameraShoulder = 1;
-                };
+            _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset, 0, 0];
+            if (ThirdPerson_ShouldAutoFlipShoulderCameraPositionOnLean) then {
+              ThirdPerson_CameraShoulder = 1;
+            };
           };
         };
       };
@@ -258,7 +263,7 @@ ThirdPerson_IsUnitInRightCombatStance = {
       "filmGrain" ppEffectCommit 0;
 
       "colorCorrections" ppEffectEnable true;
-      "colorCorrections" ppEffectAdjust [1, 1, -0.075, [0.06, 0.075, 0.08, 0.25], [1, 1, 1, 1], [1, 1, 1, 1]];
+      "colorCorrections" ppEffectAdjust [1, 1, -0.035, [0.06, 0.075, 0.08, 0.25], [1, 1, 1, 1], [1, 1, 1, 1]];
       "colorCorrections" ppEffectCommit 0;
     };
 
