@@ -7,10 +7,10 @@
 // Constants.
 ThirdPerson_DegreesToRadians = pi / 180;
 ThirdPerson_RadiansToDegrees = 180 / pi;
-ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "Manual"];
+ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "manual"];
 
 // Camera settings.
-ThirdPerson_CameraPositionOffset = [0.125, -0.75, 0.1];
+ThirdPerson_CameraPositionOffset = [0.125, -0.95, 0.1];
 ThirdPerson_FreeLookCameraPositionOffset = [0.05, 0.25, -0.03];
 ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
 ThirdPerson_WeaponRaisedCameraPositionOffset = [0.15, 0.15, -0.05];
@@ -90,7 +90,10 @@ ThirdPerson_IsUnitInRightCombatStance = {
 
   switch (_mouseButtonIndex) do {
     case 0: {
-      ThirdPerson_IsFiring = true;
+      _canShoot = !visibleMap;
+      if (_canShoot) then {
+        ThirdPerson_IsFiring = true;
+      };
     };
 
     case 1: {
@@ -290,7 +293,10 @@ ThirdPerson_IsUnitInRightCombatStance = {
       ThirdPerson_FocusedUnit forceWeaponFire [weaponState ThirdPerson_FocusedUnit select 1, weaponState ThirdPerson_FocusedUnit select 2];
       _weaponState = weaponState ThirdPerson_FocusedUnit;
       _fireMode = _weaponState select 2;
-      ThirdPerson_IsFiring = _fireMode in ThirdPerson_AutomaticWeaponFireModes;
+      _roundsInMagazine = _weaponState select 4;
+      _isFocusedUnitWeaponOutOfAmmo = _roundsInMagazine == 0;
+      _shouldContinueFiring = !_isFocusedUnitWeaponOutOfAmmo && _fireMode in ThirdPerson_AutomaticWeaponFireModes;
+      ThirdPerson_IsFiring = _shouldContinueFiring;
     };
   }
 ] call BIS_fnc_addStackedEventHandler;
