@@ -10,18 +10,20 @@ ThirdPerson_RadiansToDegrees = 180 / pi;
 ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "Manual"];
 
 // Camera settings.
-ThirdPerson_CameraPositionOffset = [0.025, -1, 0.2];
-ThirdPerson_FreeLookCameraPositionOffset = [0.1, 0.45, 0.02];
+ThirdPerson_CameraPositionOffset = [0.025, -0.85, 0.15];
+ThirdPerson_FreeLookCameraPositionOffset = [0.025, 0.25, -0.03];
 ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
 ThirdPerson_WeaponRaisedCameraPositionOffset = [0.35, 0.15, -0.15];
 ThirdPerson_WeaponRaisedCameraPitchOffset = 10;
-ThirdPerson_WeaponRaisedCameraBankOffset = -1.5;
+ThirdPerson_WeaponRaisedCameraBankOffset = 0;
 ThirdPerson_CameraPitchOffset = -5;
-ThirdPerson_CameraBankOffset = -3.5;
-ThirdPerson_CameraPositionLeanRightOffset = 0.75;
-ThirdPerson_CameraPositionLeanLeftOffset = 10;
+ThirdPerson_CameraBankOffset = 0;
+ThirdPerson_CameraPositionLeanRightOffset = 0;
+ThirdPerson_CameraPositionLeanLeftOffset = 0;
 ThirdPerson_CameraMovementSpeed = [0.35, 0.35, 0.35];
 ThirdPerson_CameraRotationSpeed = 0.15;
+ThirdPerson_ArePostProcessingEffectsEnabled = true;
+ThirdPerson_ShouldSwitchShoulderOnLean = false;
 
 // Global state.
 ThirdPerson_FocusedUnit = player;
@@ -34,14 +36,50 @@ ThirdPerson_CameraRotation = [0, 0, 0];
 ThirdPerson_CameraTorque = [0, 0, 0];
 ThirdPerson_IsFiring = false;
 ThirdPerson_CameraShakeAmount = 0;
+ThirdPerson_CameraShoulder = 1; // -1 = left shoulder, 1 = right shoulder.
 
-// Setup camera shake from gunfire near camera.
-ThirdPerson_FocusedUnit addEventHandler ["Fired", {
-  ThirdPerson_CameraShakeAmount = ThirdPerson_CameraShakeAmount + 0.05 + random 0.02;
-}];
+// Add CBA keybindings.
+[
+  "CineCam",
+  "ToggleCameraShoulder",
+  "Toggle Camera Shoulder",
+  {
+    ThirdPerson_CameraShoulder = ThirdPerson_CameraShoulder * -1;
+    true;
+  },
+  ""
+] call CBA_fnc_addKeybind;
+
+// Useful functions.
+ThirdPerson_IsWeaponLowered = {
+  _unit = param [0];
+  _unitAnimationState = animationState _unit;
+  _isWeaponLowered =
+    weaponLowered _unit ||
+    _unitAnimationState find "slow" >= 0; // Lowered weapon sprint animation states look like they have this in common with their names.
+  _isWeaponLowered;
+};
+
+ThirdPerson_IsUnitInLeftCombatStance = {
+  _unit = param [0];
+  _unitAnimationState = animationState _unit;
+  _isUnitInLeftCombatStance = _unitAnimationState find "left" >= 0;
+  _isUnitInLeftCombatStance;
+};
+
+ThirdPerson_IsUnitInRightCombatStance = {
+  _unit = param [0];
+  _unitAnimationState = animationState _unit;
+  _isUnitInRightCombatStance = _unitAnimationState find "right" >= 0;
+  _isUnitInRightCombatStance;
+};
 
 // Handle input.
 (findDisplay 46) displayAddEventHandler ["MouseButtonDown", {
+  if (dialog) exitWith {
+    false;
+  };
+
   _mouseButtonIndex = _this select 1;
 
   switch (_mouseButtonIndex) do {
@@ -62,10 +100,14 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     }
   };
 
-	false;
+ false;
 }];
 
 (findDisplay 46) displayAddEventHandler ["MouseButtonUp", {
+  if (dialog) exitWith {
+    false;
+  };
+
   _mouseButtonIndex = _this select 1;
 
   switch (_mouseButtonIndex) do {
@@ -74,10 +116,14 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     };
   };
 
-	false;
+ false;
 }];
 
 (findDisplay 46) displayAddEventHandler ["KeyDown", {
+  if (dialog) exitWith {
+    false;
+  };
+
   _actionKey = _this select 1;
   _shouldInterceptKey = false;
 
@@ -85,6 +131,11 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     if (_actionKey in actionKeys "reloadMagazine") then {
       reload ThirdPerson_FocusedUnit;
     };
+
+    if (_actionKey in actionKeys "gear" && !dialog) then {
+      switchCamera ThirdPerson_FocusedUnit;
+      createGearDialog [ThirdPerson_FocusedUnit];
+    }
   };
 
   if (_actionKey in actionKeys "personView") then {
@@ -93,7 +144,7 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     _shouldInterceptKey = true;
   };
 
-	_shouldInterceptKey;
+ _shouldInterceptKey;
 }];
 
 // Handle frame update.
@@ -114,7 +165,7 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     _focusedUnitLeanAmount = (_focusedUnitNeckModelPosition select 0) - (_focusedUnitSpineModelPosition select 0);
     _freeLookCameraOffset = [0, 0, 0];
     if (freeLook) then {
-       _freeLookCameraOffset = ThirdPerson_FreeLookCameraPositionOffset;
+       _freeLookCameraOffset = [(ThirdPerson_FreeLookCameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_FreeLookCameraPositionOffset select 1, ThirdPerson_FreeLookCameraPositionOffset select 2];
     };
     _proneCameraPositionOffset = [0, 0, 0];
     if (stance ThirdPerson_FocusedUnit == "prone") then {
@@ -124,33 +175,44 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     _weaponRaisedCameraPitchOffset = 0;
     _weaponRaisedCameraBankOffset = 0;
     _cameraPositionLeanOffset = [0, 0, 0];
-    if (!weaponLowered ThirdPerson_FocusedUnit) then {
-      _weaponRaisedCameraPositionOffset = ThirdPerson_WeaponRaisedCameraPositionOffset;
-      _weaponRaisedCameraPitchOffset = ThirdPerson_WeaponRaisedCameraPitchOffset;
-      _weaponRaisedCameraBankOffset = ThirdPerson_WeaponRaisedCameraBankOffset;
-      if (inputAction "LeanLeft" > 0 || inputAction "LeanLeftToggle" > 0 || inputAction "LeanRightToggle" > 0 || inputAction "LeanRightToggle" > 0) then {
-        if (_focusedUnitLeanAmount > 0) then {
-          _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset * _focusedUnitLeanAmount, 0, 0];
-        } else {
-          if (_focusedUnitLeanAmount < 0) then {
-            _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanLeftOffset * _focusedUnitLeanAmount, 0, 0];
-          };
+    if (!(ThirdPerson_FocusedUnit call ThirdPerson_IsWeaponLowered)) then {
+      if (_focusedUnitLeanAmount < 0 &&
+          inputAction "LeanLeft" > 0 ||
+          inputAction "LeanLeftToggle" > 0 ||
+          ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInLeftCombatStance) then {
+            _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanLeftOffset, 0, 0];
+            if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
+              ThirdPerson_CameraShoulder = -1;
+            };
+      } else {
+        if (_focusedUnitLeanAmount > 0 &&
+            inputAction "LeanRight" > 0 ||
+            inputAction "LeanRightToggle" > 0 ||
+            ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInRightCombatStance) then {
+              _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset, 0, 0];
+              if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
+                ThirdPerson_CameraShoulder = 1;
+              };
         };
       };
+      _weaponRaisedCameraPositionOffset = [(ThirdPerson_WeaponRaisedCameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_WeaponRaisedCameraPositionOffset select 1, ThirdPerson_WeaponRaisedCameraPositionOffset select 2];
+      _weaponRaisedCameraPitchOffset = ThirdPerson_WeaponRaisedCameraPitchOffset;
+      _weaponRaisedCameraBankOffset = ThirdPerson_WeaponRaisedCameraBankOffset;
     };
     _cameraPositionSwayOffset = [sin (time * 45) * 0.015, cos (time * 60) * 0.0085, sin (time * 50) * 0.001];
     _cameraPositionShakeOffset = [0, (ThirdPerson_CameraShakeAmount * -0.3), -0.2 * ThirdPerson_CameraShakeAmount];
     _cameraPositionLookOffset = [0, ((_focusedUnitEyeDirection select 2) * -0.5), ((_focusedUnitEyeDirection select 2) * -0.75)];
-    _cameraPositionOffset =
-      ThirdPerson_CameraPositionOffset vectorAdd
-       _cameraPositionLeanOffset vectorAdd
-       _cameraPositionLookOffset vectorAdd
-       _cameraPositionSwayOffset vectorAdd
-       _cameraPositionShakeOffset vectorAdd
-       _freeLookCameraOffset vectorAdd
-       _proneCameraPositionOffset vectorAdd
-       _weaponRaisedCameraPositionOffset;
-    _focusedUnitModelPositionWithOffset = _focusedUnitNeckModelPosition vectorAdd _cameraPositionOffset;
+    _cameraPositionOffset = [(ThirdPerson_CameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_CameraPositionOffset select 1, ThirdPerson_CameraPositionOffset select 2];
+    _finalCameraPositionOffset =
+      _cameraPositionOffset vectorAdd
+      _cameraPositionLeanOffset vectorAdd
+      _cameraPositionLookOffset vectorAdd
+      _cameraPositionSwayOffset vectorAdd
+      _cameraPositionShakeOffset vectorAdd
+      _freeLookCameraOffset vectorAdd
+      _proneCameraPositionOffset vectorAdd
+      _weaponRaisedCameraPositionOffset;
+    _focusedUnitModelPositionWithOffset = _focusedUnitNeckModelPosition vectorAdd _finalCameraPositionOffset;
 
     // Handle camera position.
     _cameraTargetPosition = AGLToASL (ThirdPerson_FocusedUnit modelToWorldVisual _focusedUnitModelPositionWithOffset);
@@ -166,7 +228,7 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
     // Handle camera rotation.
     _cameraTargetPitchBank = [
       ((_focusedUnitEyeDirection select 2) * 90) + ThirdPerson_CameraPitchOffset + _weaponRaisedCameraPitchOffset + (cos (time * 70) * 0.2) + (ThirdPerson_CameraShakeAmount * 30) + ((random ThirdPerson_CameraShakeAmount - random ThirdPerson_CameraShakeAmount) * 10), // Pitch.
-      (_focusedUnitLeanAmount * 90) + ThirdPerson_CameraBankOffset + _weaponRaisedCameraBankOffset + (cos (time * 190) * 0.075) + ((random ThirdPerson_CameraShakeAmount - random ThirdPerson_CameraShakeAmount) * 10) // Bank.
+      (_focusedUnitLeanAmount * 30) + ThirdPerson_CameraBankOffset + _weaponRaisedCameraBankOffset + (cos (time * 190) * 0.075) + ((random ThirdPerson_CameraShakeAmount - random ThirdPerson_CameraShakeAmount) * 10) // Bank.
     ];
     _pitchBankDifference = [(_cameraTargetPitchBank select 0) - (ThirdPerson_CameraRotation select 0), (_cameraTargetPitchBank select 1) - (ThirdPerson_CameraRotation select 1)];
     _focusedUnitLookYaw = (_focusedUnitEyeDirection select 0) atan2 (_focusedUnitEyeDirection select 1);
@@ -181,6 +243,21 @@ ThirdPerson_FocusedUnit addEventHandler ["Fired", {
 
     // Reduce camera shake.
     ThirdPerson_CameraShakeAmount = ThirdPerson_CameraShakeAmount * 0.85;
+
+    // Handle post-process effects.
+    if (ThirdPerson_ArePostProcessingEffectsEnabled) then {
+      "chromAberration" ppEffectEnable true;
+      "chromAberration" ppEffectAdjust [0.0015, 0.0015, true];
+      "chromAberration" ppEffectCommit 0;
+
+      "filmGrain" ppEffectEnable true;
+      "filmGrain" ppEffectAdjust [0.1, 0.1, 0.2, 0.2, 0.2, false];
+      "filmGrain" ppEffectCommit 0;
+
+      "colorCorrections" ppEffectEnable true;
+      "colorCorrections" ppEffectAdjust [1, 1, -0.075, [0.06, 0.075, 0.08, 0.25], [1, 1, 1, 1], [1, 1, 1, 1]];
+      "colorCorrections" ppEffectCommit 0;
+    };
 
     // Handle point of view.
     if (vehicle ThirdPerson_FocusedUnit != ThirdPerson_FocusedUnit) then {
