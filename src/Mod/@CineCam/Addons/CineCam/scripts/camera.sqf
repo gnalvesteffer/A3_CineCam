@@ -285,9 +285,6 @@ ThirdPerson_IsUnitInRightCombatStance = {
       };
     };
 
-    // Handle night vision.
-    camUseNVG (currentVisionMode ThirdPerson_FocusedUnit == 1);
-
     // Handle weapon firing.
     if (ThirdPerson_IsFiring) then {
       ThirdPerson_FocusedUnit forceWeaponFire [weaponState ThirdPerson_FocusedUnit select 1, weaponState ThirdPerson_FocusedUnit select 2];
