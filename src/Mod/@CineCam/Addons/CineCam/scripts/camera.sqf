@@ -176,23 +176,26 @@ ThirdPerson_IsUnitInRightCombatStance = {
     _weaponRaisedCameraBankOffset = 0;
     _cameraPositionLeanOffset = [0, 0, 0];
     if (!(ThirdPerson_FocusedUnit call ThirdPerson_IsWeaponLowered)) then {
-      if (_focusedUnitLeanAmount < 0 &&
-          inputAction "LeanLeft" > 0 ||
-          inputAction "LeanLeftToggle" > 0 ||
-          ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInLeftCombatStance) then {
-            _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanLeftOffset, 0, 0];
-            if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
-              ThirdPerson_CameraShoulder = -1;
-            };
-      } else {
-        if (_focusedUnitLeanAmount > 0 &&
-            inputAction "LeanRight" > 0 ||
-            inputAction "LeanRightToggle" > 0 ||
-            ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInRightCombatStance) then {
-              _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset, 0, 0];
+      _isToggleCameraShoulderKeybindingUndefined = isNil { ["CineCam", "ToggleCameraShoulder"] call CBA_fnc_getKeybind };
+      if (_isToggleCameraShoulderKeybindingUndefined) then {
+        if (_focusedUnitLeanAmount < 0 &&
+            inputAction "LeanLeft" > 0 ||
+            inputAction "LeanLeftToggle" > 0 ||
+            ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInLeftCombatStance) then {
+              _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanLeftOffset, 0, 0];
               if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
-                ThirdPerson_CameraShoulder = 1;
+                ThirdPerson_CameraShoulder = -1;
               };
+        } else {
+          if (_focusedUnitLeanAmount > 0 &&
+              inputAction "LeanRight" > 0 ||
+              inputAction "LeanRightToggle" > 0 ||
+              ThirdPerson_FocusedUnit call ThirdPerson_IsUnitInRightCombatStance) then {
+                _cameraPositionLeanOffset = [ThirdPerson_CameraPositionLeanRightOffset, 0, 0];
+                if (ThirdPerson_ShouldSwitchShoulderOnLean) then {
+                  ThirdPerson_CameraShoulder = 1;
+                };
+          };
         };
       };
       _weaponRaisedCameraPositionOffset = [(ThirdPerson_WeaponRaisedCameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_WeaponRaisedCameraPositionOffset select 1, ThirdPerson_WeaponRaisedCameraPositionOffset select 2];
