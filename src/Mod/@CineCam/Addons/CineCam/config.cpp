@@ -9,7 +9,7 @@ class CfgPatches
         projectName = "CineCam";
         author = "Zooloo75";
         url = "https://forums.bohemia.net/forums/topic/220040-wip-cinecam-cinematic-third-person-camera-replacement/";
-        version = 0.11;
+        version = 0.12;
       };
     };
 
