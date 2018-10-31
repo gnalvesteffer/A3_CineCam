@@ -10,13 +10,13 @@ ThirdPerson_RadiansToDegrees = 180 / pi;
 ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "Manual"];
 
 // Camera settings.
-ThirdPerson_CameraPositionOffset = [0.025, -0.85, 0.15];
-ThirdPerson_FreeLookCameraPositionOffset = [0.125, 0.25, -0.03];
+ThirdPerson_CameraPositionOffset = [0.125, -0.75, 0.1];
+ThirdPerson_FreeLookCameraPositionOffset = [0.05, 0.25, -0.03];
 ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
-ThirdPerson_WeaponRaisedCameraPositionOffset = [0.35, 0.15, -0.15];
-ThirdPerson_WeaponRaisedCameraPitchOffset = 10;
+ThirdPerson_WeaponRaisedCameraPositionOffset = [0.15, 0.15, -0.05];
+ThirdPerson_WeaponRaisedCameraPitchOffset = 0;
 ThirdPerson_WeaponRaisedCameraBankOffset = 0;
-ThirdPerson_CameraPitchOffset = -5;
+ThirdPerson_CameraPitchOffset = 0;
 ThirdPerson_CameraBankOffset = 0;
 ThirdPerson_CameraPositionLeanRightOffset = 0;
 ThirdPerson_CameraPositionLeanLeftOffset = 0;
