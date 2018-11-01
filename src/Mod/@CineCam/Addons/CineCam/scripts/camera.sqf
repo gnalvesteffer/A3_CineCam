@@ -10,20 +10,182 @@ ThirdPerson_RadiansToDegrees = 180 / pi;
 ThirdPerson_AutomaticWeaponFireModes = ["FullAuto", "manual"];
 
 // Camera settings.
-ThirdPerson_CameraPositionOffset = [0.125, -0.95, 0.1];
-ThirdPerson_FreeLookCameraPositionOffset = [0.05, 0.25, -0.03];
-ThirdPerson_ProneCameraPositionOffset = [-0.1, -0.3, 0.15];
-ThirdPerson_WeaponRaisedCameraPositionOffset = [0.15, 0.15, -0.05];
-ThirdPerson_WeaponRaisedCameraPitchOffset = 0;
-ThirdPerson_WeaponRaisedCameraBankOffset = 0;
-ThirdPerson_CameraPitchOffset = 0;
-ThirdPerson_CameraBankOffset = 0;
-ThirdPerson_CameraPositionLeanRightOffset = 0;
-ThirdPerson_CameraPositionLeanLeftOffset = 0;
-ThirdPerson_CameraMovementSpeed = [0.35, 0.35, 0.35];
-ThirdPerson_CameraRotationSpeed = 0.15;
-ThirdPerson_ArePostProcessingEffectsEnabled = true;
-ThirdPerson_ShouldAutoFlipShoulderCameraPositionOnLean = true;
+[
+  "ThirdPerson_CameraPositionOffsetX",
+  "SLIDER",
+  ["Camera X-Position Offset", "The distance the camera is positioned from the player."],
+  "CineCam",
+  [-25, 25, 0.125, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraPositionOffsetY",
+  "SLIDER",
+  ["Camera Y-Position Offset", "The distance the camera is positioned from the player."],
+  "CineCam",
+  [-25, 25, -0.95, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraPositionOffsetZ",
+  "SLIDER",
+  ["Camera Z-Position Offset", "The distance the camera is positioned from the player."],
+  "CineCam",
+  [-25, 25, 0.1, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraPitchOffset",
+  "SLIDER",
+  ["Camera Pitch Offset", "The degrees the camera is tilted forward/backward."],
+  "CineCam",
+  [-180, 180, 0, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraBankOffset",
+  "SLIDER",
+  ["Camera Bank Offset", "The degrees the camera is tilted left/right."],
+  "CineCam",
+  [-180, 180, 0, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraMovementSpeed",
+  "SLIDER",
+  "Camera Movement Speed",
+  "CineCam",
+  [0.01, 0.99, 0.35, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraRotationSpeed",
+  "SLIDER",
+  "Camera Rotation Speed",
+  "CineCam",
+  [0.01, 1, 0.15, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_FreeLookCameraPositionOffsetX",
+  "SLIDER",
+  ["Camera X-Position Offset When Free-Looking", "The additional distance the camera is positioned when the player is free-looking."],
+  "CineCam",
+  [-25, 25, 0.05, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_FreeLookCameraPositionOffsetY",
+  "SLIDER",
+  ["Camera Y-Position Offset When Free-Looking", "The additional distance the camera is positioned when the player is free-looking."],
+  "CineCam",
+  [-25, 25, 0.25, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_FreeLookCameraPositionOffsetZ",
+  "SLIDER",
+  ["Camera Z-Position Offset When Free-Looking", "The additional distance the camera is positioned when the player is free-looking."],
+  "CineCam",
+  [-25, 25, -0.03, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_ProneCameraPositionOffsetX",
+  "SLIDER",
+  ["Camera X-Position Offset When Prone", "The additional distance the camera is positioned when the player is in the prone stance."],
+  "CineCam",
+  [-25, 25, -0.1, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_ProneCameraPositionOffsetY",
+  "SLIDER",
+  ["Camera Y-Position Offset When Prone", "The additional distance the camera is positioned when the player is in the prone stance."],
+  "CineCam",
+  [-25, 25, -0.3, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_ProneCameraPositionOffsetZ",
+  "SLIDER",
+  ["Camera Z-Position Offset When Prone", "The additional distance the camera is positioned when the player is in the prone stance."],
+  "CineCam",
+  [-25, 25, 0.15, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_WeaponRaisedCameraPositionOffsetX",
+  "SLIDER",
+  ["Camera X-Position Offset w/ Weapon Raised", "The additional distance the camera is positioned when the player's weapon is raised."],
+  "CineCam",
+  [-25, 25, 0.15, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_WeaponRaisedCameraPositionOffsetY",
+  "SLIDER",
+  ["Camera Y-Position Offset w/ Weapon Raised", "The additional distance the camera is positioned when the player's weapon is raised."],
+  "CineCam",
+  [-25, 25, 0.15, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_WeaponRaisedCameraPositionOffsetZ",
+  "SLIDER",
+  ["Camera Z-Position Offset w/ Weapon Raised", "The additional distance the camera is positioned when the player's weapon is raised."],
+  "CineCam",
+  [-25, 25, -0.05, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_WeaponRaisedCameraPitchOffset",
+  "SLIDER",
+  ["Camera Pitch Offset w/ Weapon Raised", "The additional degrees the camera is tilted forward/backward when the player's weapon is raised."],
+  "CineCam",
+  [-180, 180, 0, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_WeaponRaisedCameraBankOffset",
+  "SLIDER",
+  ["Camera Bank Offset w/ Weapon Raised", "The additional degrees the camera is tilted left/right when the player's weapon is raised."],
+  "CineCam",
+  [-180, 180, 0, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraPositionLeanRightOffset",
+  "SLIDER",
+  ["Right Lean Camera Position Offset", "How far the camera should move horizontally when leaning right."],
+  "CineCam",
+  [-25, 25, 0, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_CameraPositionLeanLeftOffset",
+  "SLIDER",
+  ["Left Lean Camera Position Offset", "How far the camera should move horizontally when leaning left."],
+  "CineCam",
+  [-25, 25, 0, 2],
+  1
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_ShouldAutoFlipShoulderCameraPositionOnLean",
+  "CHECKBOX",
+  ["Shoulder-Cam Follows Lean", "Will make the shoulder-cam automatically position itself based on the player's lean direction.\nNOTE: This can be manually-controlled by setting 'Toggle Camera Shoulder' in (Options > Controls > Configure Addons > CineCam)."],
+  "CineCam",
+  true,
+  2
+] call CBA_Settings_fnc_init;
+[
+  "ThirdPerson_ArePostProcessingEffectsEnabled",
+  "CHECKBOX",
+  ["Enable Post-Processing Effects", "Enables post-processing effects, such as color correction, film grain, and chromatic aberration.\nNOTE: Disabling doesn't take effect until mission restart."],
+  "CineCam",
+  false,
+  2
+] call CBA_Settings_fnc_init;
 
 // Global state.
 ThirdPerson_FocusedUnit = player;
@@ -174,11 +336,11 @@ ThirdPerson_IsUnitInRightCombatStance = {
     _focusedUnitLeanAmount = (_focusedUnitNeckModelPosition select 0) - (_focusedUnitSpineModelPosition select 0);
     _freeLookCameraOffset = [0, 0, 0];
     if (freeLook) then {
-       _freeLookCameraOffset = [(ThirdPerson_FreeLookCameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_FreeLookCameraPositionOffset select 1, ThirdPerson_FreeLookCameraPositionOffset select 2];
+       _freeLookCameraOffset = [ThirdPerson_FreeLookCameraPositionOffsetX * ThirdPerson_CameraShoulder, ThirdPerson_FreeLookCameraPositionOffsetY, ThirdPerson_FreeLookCameraPositionOffsetZ];
     };
     _proneCameraPositionOffset = [0, 0, 0];
     if (stance ThirdPerson_FocusedUnit == "prone") then {
-      _proneCameraPositionOffset = ThirdPerson_ProneCameraPositionOffset;
+      _proneCameraPositionOffset = [ThirdPerson_ProneCameraPositionOffsetX, ThirdPerson_ProneCameraPositionOffsetY, ThirdPerson_ProneCameraPositionOffsetZ];
     };
     _weaponRaisedCameraPositionOffset = [0, 0, 0];
     _weaponRaisedCameraPitchOffset = 0;
@@ -206,14 +368,14 @@ ThirdPerson_IsUnitInRightCombatStance = {
           };
         };
       };
-      _weaponRaisedCameraPositionOffset = [(ThirdPerson_WeaponRaisedCameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_WeaponRaisedCameraPositionOffset select 1, ThirdPerson_WeaponRaisedCameraPositionOffset select 2];
+      _weaponRaisedCameraPositionOffset = [ThirdPerson_WeaponRaisedCameraPositionOffsetX * ThirdPerson_CameraShoulder, ThirdPerson_WeaponRaisedCameraPositionOffsetY, ThirdPerson_WeaponRaisedCameraPositionOffsetZ];
       _weaponRaisedCameraPitchOffset = ThirdPerson_WeaponRaisedCameraPitchOffset;
       _weaponRaisedCameraBankOffset = ThirdPerson_WeaponRaisedCameraBankOffset;
     };
     _cameraPositionSwayOffset = [sin (time * 45) * 0.015, cos (time * 60) * 0.0085, sin (time * 50) * 0.001];
     _cameraPositionShakeOffset = [0, (ThirdPerson_CameraShakeAmount * -0.3), -0.2 * ThirdPerson_CameraShakeAmount];
     _cameraPositionLookOffset = [0, ((_focusedUnitEyeDirection select 2) * -0.5), ((_focusedUnitEyeDirection select 2) * -0.75)];
-    _cameraPositionOffset = [(ThirdPerson_CameraPositionOffset select 0) * ThirdPerson_CameraShoulder, ThirdPerson_CameraPositionOffset select 1, ThirdPerson_CameraPositionOffset select 2];
+    _cameraPositionOffset = [ThirdPerson_CameraPositionOffsetX * ThirdPerson_CameraShoulder, ThirdPerson_CameraPositionOffsetY, ThirdPerson_CameraPositionOffsetZ];
     _finalCameraPositionOffset =
       _cameraPositionOffset vectorAdd
       _cameraPositionLeanOffset vectorAdd
@@ -228,11 +390,7 @@ ThirdPerson_IsUnitInRightCombatStance = {
     // Handle camera position.
     _cameraTargetPosition = AGLToASL (ThirdPerson_FocusedUnit modelToWorldVisual _focusedUnitModelPositionWithOffset);
     _positionDifference = _cameraTargetPosition vectorDiff ThirdPerson_CameraPosition;
-    ThirdPerson_CameraVelocity = [
-      (_positionDifference select 0) * (ThirdPerson_CameraMovementSpeed select 0),
-      (_positionDifference select 1) * (ThirdPerson_CameraMovementSpeed select 1),
-      (_positionDifference select 2) * (ThirdPerson_CameraMovementSpeed select 2)
-    ];
+    ThirdPerson_CameraVelocity = _positionDifference vectorMultiply ThirdPerson_CameraMovementSpeed;
     ThirdPerson_CameraPosition = ThirdPerson_CameraPosition vectorAdd ThirdPerson_CameraVelocity;
     ThirdPerson_Camera setPosASL ThirdPerson_CameraPosition;
 
