@@ -262,7 +262,7 @@ ThirdPerson_IsUnitInRightCombatStance = {
       "chromAberration" ppEffectCommit 0;
 
       "filmGrain" ppEffectEnable true;
-      "filmGrain" ppEffectAdjust [0.0125, 0.0125, 0.4, 0.4, 0.4, false];
+      "filmGrain" ppEffectAdjust [0.02, 0.02, 0.4, 0.4, 0.4, false];
       "filmGrain" ppEffectCommit 0;
 
       "colorCorrections" ppEffectEnable true;
